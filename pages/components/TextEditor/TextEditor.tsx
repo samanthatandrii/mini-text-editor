@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import isHotkey from 'is-hotkey'
-import { Editable, withReact, Slate, ReactEditor, useSlate } from 'slate-react'
+import { Editable, withReact, Slate, ReactEditor } from 'slate-react'
 import {
   Editor,
   Transforms,
@@ -11,92 +11,14 @@ import {
 } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
 import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../shared/constants'
-import { Box, Button, ButtonGroup, Heading, List, ListItem, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
+import { Box, Button, ButtonGroup, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
 import { FaAlignCenter, FaAlignJustify, FaAlignLeft, FaAlignRight, FaBold, FaCode, FaHighlighter, FaItalic, FaUnderline } from 'react-icons/fa'
 import { TbChevronDown, TbSquare1, TbSquare2 } from 'react-icons/tb'
 import { MdFormatListBulleted, MdFormatQuote } from 'react-icons/md'
 import { BsListTask } from 'react-icons/bs'
 import { VscListOrdered } from 'react-icons/vsc'
 import { BlockButton, MarkButton } from './Buttons'
-
-const Element = (props: any) => {
-  const style = { textAlign: props.element.align }
-  switch (props.element.type) {
-    case 'block-quote':
-      return (
-        <blockquote style={style} >
-          {props.children}
-        </blockquote>
-      )
-    case 'heading-one':
-      return (
-        <Heading as="h1" size="xl" style={style} >
-          {props.children}
-        </Heading>
-      )
-    case 'heading-two':
-      return (
-        <Heading as="h2" size="lg" style={style} >
-          {props.children}
-        </Heading>
-      )
-    case 'list-item':
-      return (
-        <ListItem style={style} >
-          {props.children}
-        </ListItem>
-      )
-    case 'bulleted-list':
-      return (
-        <List style={style} listStyleType="disc">
-          {props.children}
-        </List>
-      )
-    case 'numbered-list':
-      return (
-        <List style={style} listStyleType="decimal">
-          {props.children}
-        </List>
-      )
-    case 'circle-list':
-      return (
-        <List style={style} listStyleType="circle">
-          {props.children}
-        </List>
-      )
-    default:
-      return (
-        <p style={style} >
-          {props.children}
-        </p>
-      )
-  }
-}
-
-const Leaf = (props: any) => {
-  let childComponent = props.children
-  if (props.leaf.bold) {
-    childComponent = <strong>{childComponent}</strong>
-  }
-
-  if (props.leaf.code) {
-    childComponent = <code>{childComponent}</code>
-  }
-
-  if (props.leaf.italic) {
-    childComponent = <em>{childComponent}</em>
-  }
-
-  if (props.leaf.underline) {
-    childComponent = <u>{childComponent}</u>
-  }
-
-  if (props.leaf.highlight) {
-    childComponent = <mark>{childComponent}</mark>
-  }
-
-  return <span {...props.attributes}>{childComponent}</span>
-}
+import { Element, Leaf } from './Element'
 
 const initialValue: Descendant[] = [
   {

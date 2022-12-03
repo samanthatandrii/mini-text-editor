@@ -3,6 +3,7 @@ export const SHORT_KEY = {
   'mod+i': 'italic',
   'mod+u': 'underline',
   'mod+-': 'code',
+  'mod+h': 'highlight'
 }
 
 export const LIST_TYPE = ['numbered-list', 'bulleted-list', 'circle-list']
