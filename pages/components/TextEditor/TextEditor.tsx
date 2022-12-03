@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import isHotkey from 'is-hotkey'
-import { Editable, withReact, Slate, ReactEditor } from 'slate-react'
+import { Editable, withReact, Slate, ReactEditor, useSlate } from 'slate-react'
 import {
   Editor,
   Transforms,
@@ -9,12 +9,14 @@ import {
   Element as SlateElement,
   BaseEditor,
 } from 'slate'
-import { withHistory } from 'slate-history'
+import { HistoryEditor, withHistory } from 'slate-history'
 import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../shared/constants'
-import { ButtonGroup, Heading, ListItem, OrderedList, UnorderedList } from '@chakra-ui/react'
-import { FaAlignCenter, FaAlignJustify, FaAlignLeft, FaAlignRight, FaBold, FaCode, FaItalic, FaUnderline } from 'react-icons/fa'
-import { TbSquare1, TbSquare2 } from 'react-icons/tb'
-import { MdFormatListNumbered, MdFormatListBulleted, MdFormatQuote } from 'react-icons/md'
+import { Box, Button, ButtonGroup, Heading, List, ListItem, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
+import { FaAlignCenter, FaAlignJustify, FaAlignLeft, FaAlignRight, FaBold, FaCode, FaHighlighter, FaItalic, FaUnderline } from 'react-icons/fa'
+import { TbChevronDown, TbSquare1, TbSquare2 } from 'react-icons/tb'
+import { MdFormatListBulleted, MdFormatQuote } from 'react-icons/md'
+import { BsListTask } from 'react-icons/bs'
+import { VscListOrdered } from 'react-icons/vsc'
 import { BlockButton, MarkButton } from './Buttons'
 
 const Element = (props: any) => {
@@ -22,43 +24,49 @@ const Element = (props: any) => {
   switch (props.element.type) {
     case 'block-quote':
       return (
-        <blockquote as="mark" style={style} {...props.attributes}>
+        <blockquote style={style} >
           {props.children}
         </blockquote>
       )
-    case 'bulleted-list':
-      return (
-        <UnorderedList style={style} {...props.attributes}>
-          {props.children}
-        </UnorderedList>
-      )
     case 'heading-one':
       return (
-        <Heading as="h1" size="xl" style={style} {...props.attributes}>
+        <Heading as="h1" size="xl" style={style} >
           {props.children}
         </Heading>
       )
     case 'heading-two':
       return (
-        <Heading as="h2" size="lg" style={style} {...props.attributes}>
+        <Heading as="h2" size="lg" style={style} >
           {props.children}
         </Heading>
       )
     case 'list-item':
       return (
-        <ListItem style={style} {...props.attributes}>
+        <ListItem style={style} >
           {props.children}
         </ListItem>
       )
+    case 'bulleted-list':
+      return (
+        <List style={style} listStyleType="disc">
+          {props.children}
+        </List>
+      )
     case 'numbered-list':
       return (
-        <OrderedList style={style} {...props.attributes}>
+        <List style={style} listStyleType="decimal">
           {props.children}
-        </OrderedList>
+        </List>
+      )
+    case 'circle-list':
+      return (
+        <List style={style} listStyleType="circle">
+          {props.children}
+        </List>
       )
     default:
       return (
-        <p style={style} {...props.attributes}>
+        <p style={style} >
           {props.children}
         </p>
       )
@@ -83,6 +91,10 @@ const Leaf = (props: any) => {
     childComponent = <u>{childComponent}</u>
   }
 
+  if (props.leaf.highlight) {
+    childComponent = <mark>{childComponent}</mark>
+  }
+
   return <span {...props.attributes}>{childComponent}</span>
 }
 
@@ -94,13 +106,15 @@ const initialValue: Descendant[] = [
   },
 ]
 
+const blockElement = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'numbered-list', 'bulleted-list' , 'circle-list'];
+
 const TextEditor = () => {
   const [editor] = useState(() => withHistory(withReact(createEditor())));
 
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
 
-  const isBlockActive = (editor: BaseEditor & ReactEditor, format: string, blockType = 'type') => {
+  const isBlockActive = (editor: BaseEditor & ReactEditor & HistoryEditor, format: string, blockType = 'type') => {
     const { selection } = editor //liat selection ada di posisi mana
     if (!selection) return false
 
@@ -119,7 +133,7 @@ const TextEditor = () => {
     return !!match
   }
 
-  const isMarkActive = (editor: BaseEditor & ReactEditor, format: string) => {
+  const isMarkActive = (editor: BaseEditor & ReactEditor & HistoryEditor, format: string) => {
     const marks = Editor.marks(editor) //buat dapet marks current selection, e.g bold = true atau italic = true
     type ObjectKey = keyof typeof marks;
     const key = format as ObjectKey
@@ -144,20 +158,22 @@ const TextEditor = () => {
     })
 
     let newProperties: Partial<SlateElement>;
+    console.log(isActive, isList, format)
 
     if (TEXT_ALIGNMENT_TYPES.includes(format)) {
       newProperties = {
-        align: isActive ? undefined : format,
+        align: format,
       }
     } else {
+      const type = isActive ? 'paragraph' : isList? 'list-item' : format
       newProperties = {
-        type: isActive ? 'paragraph' : isList ? 'list-item' : format,
+        type
       }
     }
     Transforms.setNodes<SlateElement>(editor, newProperties);
 
     if (!isActive && isList) {
-      const block = { type: format, children: [] }
+      const block = { type: format, align: undefined, children: [] }
       Transforms.wrapNodes(editor, block)
     }
   }
@@ -172,23 +188,112 @@ const TextEditor = () => {
     }
   }
 
+  const listMenuDisplay = () => {
+    for (let key of blockElement) {
+      if (isBlockActive(editor, key, TEXT_ALIGNMENT_TYPES.includes(key) ? 'align' : 'type')) {
+        switch (key) {
+          case 'block-quote':
+            return "Blockquote"
+          case 'heading-one':
+            return "Heading 1"
+          case 'heading-two':
+            return "Heading 2"
+          default:
+            return "Normal Text"
+        }
+      }
+    }
+    return "Normal Text"
+  }
+
   return (
     <Slate editor={editor} value={initialValue}>
-      <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4}>
-        <MarkButton format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
-        <MarkButton format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
-        <MarkButton format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
-        <MarkButton format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
-        <BlockButton format="heading-one" icon={<TbSquare1 />} onClick={() => toggleBlock("heading-one")} isActive={isBlockActive} />
-        <BlockButton format="heading-two" icon={<TbSquare2 />} onClick={() => toggleBlock("heading-two")} isActive={isBlockActive} />
-        <BlockButton format="block-quote" icon={<MdFormatQuote />} onClick={() => toggleBlock("block-quote")} isActive={isBlockActive} />
-        <BlockButton format="numbered-list" icon={<MdFormatListNumbered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
-        <BlockButton format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
-        <BlockButton format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
-        <BlockButton format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
-        <BlockButton format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
-        <BlockButton format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
-      </ButtonGroup>
+      <Box display="flex" flexDirection="row" justifyContent="center">
+        <Menu>
+          {({ isOpen }) => (
+            <>
+              <MenuButton
+                isActive={isOpen}
+                as={Button}
+                rightIcon={<TbChevronDown />}
+                width="150px"
+                px={4}
+                py={2}
+                transition='all 0.2s'
+                borderRadius='md'
+                borderWidth='1px'
+                backgroundColor="white"
+                fontWeight="medium"
+              >
+                {listMenuDisplay()}
+              </MenuButton>
+              <MenuList>
+                <MenuItem
+                  display="flex"
+                  justifyContent="space-between"
+                  onClick={event => {
+                    event.preventDefault();
+                    toggleBlock("paragraph");
+                  }}
+                >
+                  <span>Normal Text</span>
+                </MenuItem>
+                <MenuItem
+                  display="flex"
+                  justifyContent="space-between"
+                  onClick={event => {
+                    event.preventDefault();
+                    toggleBlock("heading-one");
+                  }}
+                >
+                  <span>Heading 1</span>
+                  <TbSquare1 />
+                </MenuItem>
+                <MenuItem
+                  display="flex"
+                  justifyContent="space-between"
+                  onClick={event => {
+                    event.preventDefault();
+                    toggleBlock("heading-two");
+                  }}
+                >
+                  <span>Heading 2</span>
+                  <TbSquare2 />
+                </MenuItem>
+                <MenuItem
+                  display="flex"
+                  justifyContent="space-between"
+                  onClick={event => {
+                    event.preventDefault();
+                    toggleBlock("block-quote");
+                  }}
+                >
+                  <span>Blockquote</span>
+                  <MdFormatQuote />
+                </MenuItem>
+              </MenuList>
+            </>
+          )}
+        </Menu>
+        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2} ml={2}>
+          <MarkButton format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
+          <MarkButton format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
+          <MarkButton format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
+          <MarkButton format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
+          <MarkButton format="highlight" icon={<FaHighlighter />} onClick={() => toggleMark("highlight")} isActive={isMarkActive} />
+        </ButtonGroup>
+        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2}>
+          <BlockButton format="numbered-list" icon={<VscListOrdered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
+          <BlockButton format="circle-list" icon={<BsListTask />} onClick={() => toggleBlock("circle-list")} isActive={isBlockActive} />
+          <BlockButton format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
+        </ButtonGroup>
+        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} >
+          <BlockButton format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
+          <BlockButton format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
+          <BlockButton format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
+          <BlockButton format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
+        </ButtonGroup>
+      </Box>
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}

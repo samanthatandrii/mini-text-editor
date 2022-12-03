@@ -1,6 +1,7 @@
 import { IconButton } from '@chakra-ui/react';
 import { ReactElement } from 'react';
 import { BaseEditor } from 'slate';
+import { HistoryEditor } from 'slate-history';
 import { ReactEditor, useSlate } from 'slate-react';
 import { TEXT_ALIGNMENT_TYPES } from '../../shared/constants';
 
@@ -8,7 +9,7 @@ type ButtonProps = {
   format: string,
   icon: ReactElement,
   isActive: (
-    editor: BaseEditor & ReactEditor,
+    editor: BaseEditor & ReactEditor & HistoryEditor,
     format: string,
     blockType?: string
   ) => boolean,
@@ -40,7 +41,7 @@ export const MarkButton = (props: ButtonProps) => {
       aria-label={props.format}
       icon={props.icon}
       isActive={props.isActive(editor, props.format)}
-      onMouseDown={event => {
+      onClick={event => {
         event.preventDefault();
         props.onClick();
       }}
