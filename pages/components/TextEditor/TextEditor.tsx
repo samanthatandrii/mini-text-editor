@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react'
+import React, { ReactElement, useCallback, useMemo, useState } from 'react'
 import isHotkey from 'is-hotkey'
-import { Editable, withReact, Slate, ReactEditor } from 'slate-react'
+import { Editable, withReact, Slate, ReactEditor, useSlate } from 'slate-react'
 import {
   Editor,
   Transforms,
@@ -10,15 +10,17 @@ import {
   BaseEditor,
 } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
-import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../shared/constants'
-import { Box, Button, ButtonGroup, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
+import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../../shared/constants'
+import { Box, Button, ButtonGroup, IconButton, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
 import { FaAlignCenter, FaAlignJustify, FaAlignLeft, FaAlignRight, FaBold, FaCode, FaHighlighter, FaItalic, FaUnderline } from 'react-icons/fa'
 import { TbChevronDown, TbSquare1, TbSquare2 } from 'react-icons/tb'
 import { MdFormatListBulleted, MdFormatQuote } from 'react-icons/md'
 import { BsListTask } from 'react-icons/bs'
 import { VscListOrdered } from 'react-icons/vsc'
-import { BlockButton, MarkButton } from './Buttons'
-import { Element, Leaf } from './Element'
+// import ToolbarButton from './ToolbarButton'
+import Element from './Element'
+import Leaf from './Leaf'
+// import ToolbarButton from './ToolbarButton'
 
 const initialValue: Descendant[] = [
   {
@@ -31,7 +33,8 @@ const initialValue: Descendant[] = [
 const blockElement = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'numbered-list', 'bulleted-list' , 'circle-list'];
 
 const TextEditor = () => {
-  const [editor] = useState(() => withHistory(withReact(createEditor())));
+  const [value, setValue] = useState(initialValue);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
@@ -80,7 +83,6 @@ const TextEditor = () => {
     })
 
     let newProperties: Partial<SlateElement>;
-    console.log(isActive, isList, format)
 
     if (TEXT_ALIGNMENT_TYPES.includes(format)) {
       newProperties = {
@@ -129,7 +131,7 @@ const TextEditor = () => {
   }
 
   return (
-    <Slate editor={editor} value={initialValue}>
+    <Slate editor={editor} value={value} onChange={(newValue) => setValue(newValue)}>
       <Box display="flex" flexDirection="row" justifyContent="center">
         <Menu>
           {({ isOpen }) => (
@@ -198,22 +200,22 @@ const TextEditor = () => {
           )}
         </Menu>
         <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2} ml={2}>
-          <MarkButton format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
-          <MarkButton format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
-          <MarkButton format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
-          <MarkButton format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
-          <MarkButton format="highlight" icon={<FaHighlighter />} onClick={() => toggleMark("highlight")} isActive={isMarkActive} />
+          <ToolbarButton type="mark" format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
+          <ToolbarButton type="mark" format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
+          <ToolbarButton type="mark" format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
+          <ToolbarButton type="mark" format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
+          <ToolbarButton type="mark" format="highlight" icon={<FaHighlighter />} onClick={() => toggleMark("highlight")} isActive={isMarkActive} />
         </ButtonGroup>
         <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2}>
-          <BlockButton format="numbered-list" icon={<VscListOrdered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
-          <BlockButton format="circle-list" icon={<BsListTask />} onClick={() => toggleBlock("circle-list")} isActive={isBlockActive} />
-          <BlockButton format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="numbered-list" icon={<VscListOrdered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="circle-list" icon={<BsListTask />} onClick={() => toggleBlock("circle-list")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
         </ButtonGroup>
         <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} >
-          <BlockButton format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
-          <BlockButton format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
-          <BlockButton format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
-          <BlockButton format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
+          <ToolbarButton type="block" format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
         </ButtonGroup>
       </Box>
       <Editable
@@ -235,6 +237,45 @@ const TextEditor = () => {
         }}
       />
     </Slate>
+  )
+}
+
+type ToolbarButtonProps = {
+  // editor: BaseEditor & ReactEditor & HistoryEditor
+  type: "block" | "mark"
+  format: string,
+  icon: ReactElement,
+  isActive: (
+    editor: BaseEditor & ReactEditor & HistoryEditor,
+    format: string,
+    blockType?: string
+  ) => boolean,
+  onClick: () => void,
+}
+const ToolbarButton = (props: ToolbarButtonProps) => {
+  const editor = useSlate();
+
+  const isButtonActive = () => {
+    if (props.type === "block") {
+      return props.isActive(
+        editor,
+        props.format,
+        TEXT_ALIGNMENT_TYPES.includes(props.format) ? 'align' : 'type'
+      )
+    } else {
+      return props.isActive(editor, props.format)
+    }
+  }
+  return (
+    <IconButton
+      aria-label={props.format}
+      icon={props.icon}
+      isActive={isButtonActive()}
+      onClick={event => {
+        event.preventDefault()
+        props.onClick()
+      }}
+    />
   )
 }
 

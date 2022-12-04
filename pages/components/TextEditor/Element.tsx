@@ -1,8 +1,16 @@
 import { Heading, List, ListItem } from "@chakra-ui/react"
+import { ReactNode } from "react"
+import { CustomElement } from "../../../module/slate"
 
-export const Element = (props: any) => {
-  const style = { textAlign: props.element.align }
-  switch (props.element.type) {
+type ElementProps = {
+  element: CustomElement,
+  children: ReactNode,
+}
+
+const Element = (props: ElementProps) => {
+  const textAlign = props.element?.align ?? undefined;
+  const style = { textAlign: textAlign }
+  switch (props.element?.type) {
     case 'block-quote':
       return (
         <blockquote style={style} >
@@ -54,27 +62,4 @@ export const Element = (props: any) => {
   }
 }
 
-export const Leaf = (props: any) => {
-  let childComponent = props.children
-  if (props.leaf.bold) {
-    childComponent = <strong>{childComponent}</strong>
-  }
-
-  if (props.leaf.code) {
-    childComponent = <code>{childComponent}</code>
-  }
-
-  if (props.leaf.italic) {
-    childComponent = <em>{childComponent}</em>
-  }
-
-  if (props.leaf.underline) {
-    childComponent = <u>{childComponent}</u>
-  }
-
-  if (props.leaf.highlight) {
-    childComponent = <mark>{childComponent}</mark>
-  }
-
-  return <span {...props.attributes}>{childComponent}</span>
-}
+export default Element;
