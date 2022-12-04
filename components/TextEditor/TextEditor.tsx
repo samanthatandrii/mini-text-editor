@@ -10,7 +10,7 @@ import {
   BaseEditor,
 } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
-import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../../shared/constants'
+import { LIST_TYPE, SHORT_KEY, TEXT_ALIGNMENT_TYPES } from '../../shared/constants'
 import { Box, Button, ButtonGroup, IconButton, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react'
 import { FaAlignCenter, FaAlignJustify, FaAlignLeft, FaAlignRight, FaBold, FaCode, FaHighlighter, FaItalic, FaUnderline } from 'react-icons/fa'
 import { TbChevronDown, TbSquare1, TbSquare2 } from 'react-icons/tb'
@@ -28,7 +28,7 @@ const initialValue: Descendant[] = [
   },
 ]
 
-const blockElement = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'numbered-list', 'bulleted-list' , 'circle-list'];
+const blockElement = ['paragraph', 'heading-one', 'heading-two', 'block-quote', 'list-item', 'numbered-list', 'bulleted-list', 'circle-list'];
 
 const TextEditor = () => {
   const [value, setValue] = useState(initialValue);
@@ -87,7 +87,7 @@ const TextEditor = () => {
         align: format,
       }
     } else {
-      const type = isActive ? 'paragraph' : isList? 'list-item' : format
+      const type = isActive ? 'paragraph' : isList ? 'list-item' : format
       newProperties = {
         type
       }
@@ -110,6 +110,96 @@ const TextEditor = () => {
     }
   }
 
+  const toolbar =
+    <Box display="flex" flexDirection="row" justifyContent="center" flexWrap="wrap">
+      <Menu>
+        {({ isOpen }) => (
+          <>
+            <MenuButton
+              isActive={isOpen}
+              as={Button}
+              rightIcon={<TbChevronDown />}
+              width="150px"
+              px={4}
+              py={2}
+              transition='all 0.2s'
+              borderRadius='md'
+              borderWidth='1px'
+              backgroundColor="white"
+              fontWeight="medium"
+              mx={2}
+              mb={4}
+            >
+              {listMenuDisplay()}
+            </MenuButton>
+            <MenuList>
+              <MenuItem
+                display="flex"
+                justifyContent="space-between"
+                onClick={event => {
+                  event.preventDefault();
+                  toggleBlock("paragraph");
+                }}
+              >
+                <span>Normal Text</span>
+              </MenuItem>
+              <MenuItem
+                display="flex"
+                justifyContent="space-between"
+                onClick={event => {
+                  event.preventDefault();
+                  toggleBlock("heading-one");
+                }}
+              >
+                <span>Heading 1</span>
+                <TbSquare1 />
+              </MenuItem>
+              <MenuItem
+                display="flex"
+                justifyContent="space-between"
+                onClick={event => {
+                  event.preventDefault();
+                  toggleBlock("heading-two");
+                }}
+              >
+                <span>Heading 2</span>
+                <TbSquare2 />
+              </MenuItem>
+              <MenuItem
+                display="flex"
+                justifyContent="space-between"
+                onClick={event => {
+                  event.preventDefault();
+                  toggleBlock("block-quote");
+                }}
+              >
+                <span>Blockquote</span>
+                <MdFormatQuote />
+              </MenuItem>
+            </MenuList>
+          </>
+        )}
+      </Menu>
+      <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2}>
+        <ToolbarButton type="mark" format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
+        <ToolbarButton type="mark" format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
+        <ToolbarButton type="mark" format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
+        <ToolbarButton type="mark" format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
+        <ToolbarButton type="mark" format="highlight" icon={<FaHighlighter />} onClick={() => toggleMark("highlight")} isActive={isMarkActive} />
+      </ButtonGroup>
+      <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2}>
+        <ToolbarButton type="block" format="numbered-list" icon={<VscListOrdered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
+        <ToolbarButton type="block" format="circle-list" icon={<BsListTask />} onClick={() => toggleBlock("circle-list")} isActive={isBlockActive} />
+        <ToolbarButton type="block" format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
+      </ButtonGroup>
+      <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} >
+        <ToolbarButton type="block" format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
+        <ToolbarButton type="block" format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
+        <ToolbarButton type="block" format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
+        <ToolbarButton type="block" format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
+      </ButtonGroup>
+    </Box>
+
   const listMenuDisplay = () => {
     for (let key of blockElement) {
       if (isBlockActive(editor, key, TEXT_ALIGNMENT_TYPES.includes(key) ? 'align' : 'type')) {
@@ -130,92 +220,7 @@ const TextEditor = () => {
 
   return (
     <Slate editor={editor} value={value} onChange={(newValue) => setValue(newValue)}>
-      <Box display="flex" flexDirection="row" justifyContent="center">
-        <Menu>
-          {({ isOpen }) => (
-            <>
-              <MenuButton
-                isActive={isOpen}
-                as={Button}
-                rightIcon={<TbChevronDown />}
-                width="150px"
-                px={4}
-                py={2}
-                transition='all 0.2s'
-                borderRadius='md'
-                borderWidth='1px'
-                backgroundColor="white"
-                fontWeight="medium"
-              >
-                {listMenuDisplay()}
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  display="flex"
-                  justifyContent="space-between"
-                  onClick={event => {
-                    event.preventDefault();
-                    toggleBlock("paragraph");
-                  }}
-                >
-                  <span>Normal Text</span>
-                </MenuItem>
-                <MenuItem
-                  display="flex"
-                  justifyContent="space-between"
-                  onClick={event => {
-                    event.preventDefault();
-                    toggleBlock("heading-one");
-                  }}
-                >
-                  <span>Heading 1</span>
-                  <TbSquare1 />
-                </MenuItem>
-                <MenuItem
-                  display="flex"
-                  justifyContent="space-between"
-                  onClick={event => {
-                    event.preventDefault();
-                    toggleBlock("heading-two");
-                  }}
-                >
-                  <span>Heading 2</span>
-                  <TbSquare2 />
-                </MenuItem>
-                <MenuItem
-                  display="flex"
-                  justifyContent="space-between"
-                  onClick={event => {
-                    event.preventDefault();
-                    toggleBlock("block-quote");
-                  }}
-                >
-                  <span>Blockquote</span>
-                  <MdFormatQuote />
-                </MenuItem>
-              </MenuList>
-            </>
-          )}
-        </Menu>
-        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2} ml={2}>
-          <ToolbarButton type="mark" format="bold" icon={<FaBold />} onClick={() => toggleMark("bold")} isActive={isMarkActive} />
-          <ToolbarButton type="mark" format="italic" icon={<FaItalic />} onClick={() => toggleMark("italic")} isActive={isMarkActive} />
-          <ToolbarButton type="mark" format="underline" icon={<FaUnderline />} onClick={() => toggleMark("underline")} isActive={isMarkActive} />
-          <ToolbarButton type="mark" format="code" icon={<FaCode />} onClick={() => toggleMark("code")} isActive={isMarkActive} />
-          <ToolbarButton type="mark" format="highlight" icon={<FaHighlighter />} onClick={() => toggleMark("highlight")} isActive={isMarkActive} />
-        </ButtonGroup>
-        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} mr={2}>
-          <ToolbarButton type="block" format="numbered-list" icon={<VscListOrdered />} onClick={() => toggleBlock("numbered-list")} isActive={isBlockActive} />
-          <ToolbarButton type="block" format="circle-list" icon={<BsListTask />} onClick={() => toggleBlock("circle-list")} isActive={isBlockActive} />
-          <ToolbarButton type="block" format="bulleted-list" icon={<MdFormatListBulleted />} onClick={() => toggleBlock("bulleted-list")} isActive={isBlockActive} />
-        </ButtonGroup>
-        <ButtonGroup size="md" isAttached variant="outline" display="flex" justifyContent="center" mb={4} >
-          <ToolbarButton type="block" format="left" icon={<FaAlignLeft />} onClick={() => toggleBlock("left")} isActive={isBlockActive} />
-          <ToolbarButton type="block" format="center" icon={<FaAlignCenter />} onClick={() => toggleBlock("center")} isActive={isBlockActive} />
-          <ToolbarButton type="block" format="right" icon={<FaAlignRight />} onClick={() => toggleBlock("right")} isActive={isBlockActive} />
-          <ToolbarButton type="block" format="justify" icon={<FaAlignJustify />} onClick={() => toggleBlock("justify")} isActive={isBlockActive} />
-        </ButtonGroup>
-      </Box>
+      {toolbar}
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}

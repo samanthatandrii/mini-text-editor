@@ -1,13 +1,6 @@
-import { ReactNode } from "react"
-import { CustomText } from "../../../module/slate"
+import { RenderLeafProps } from "slate-react"
 
-type LeafProps = {
-  leaf: CustomText,
-  children: ReactNode,
-  attributes: Object,
-}
-
-const Leaf = (props: LeafProps) => {
+const Leaf = (props: RenderLeafProps) => {
   let childComponent = props.children
   if (props.leaf?.bold) {
     childComponent = <strong>{childComponent}</strong>

@@ -1,13 +1,7 @@
 import { Heading, List, ListItem } from "@chakra-ui/react"
-import { ReactNode } from "react"
-import { CustomElement } from "../../../module/slate"
+import { RenderElementProps } from "slate-react"
 
-type ElementProps = {
-  element: CustomElement,
-  children: ReactNode,
-}
-
-const Element = (props: ElementProps) => {
+const Element = (props: RenderElementProps) => {
   const textAlign = props.element?.align ?? undefined;
   const style = { textAlign: textAlign }
   switch (props.element?.type) {
