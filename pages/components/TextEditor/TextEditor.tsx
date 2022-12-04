@@ -17,10 +17,8 @@ import { TbChevronDown, TbSquare1, TbSquare2 } from 'react-icons/tb'
 import { MdFormatListBulleted, MdFormatQuote } from 'react-icons/md'
 import { BsListTask } from 'react-icons/bs'
 import { VscListOrdered } from 'react-icons/vsc'
-// import ToolbarButton from './ToolbarButton'
 import Element from './Element'
 import Leaf from './Leaf'
-// import ToolbarButton from './ToolbarButton'
 
 const initialValue: Descendant[] = [
   {
@@ -241,7 +239,6 @@ const TextEditor = () => {
 }
 
 type ToolbarButtonProps = {
-  // editor: BaseEditor & ReactEditor & HistoryEditor
   type: "block" | "mark"
   format: string,
   icon: ReactElement,
