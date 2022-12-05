@@ -4,7 +4,7 @@ export const SHORT_KEY = {
   'mod+u': 'underline',
   'mod+-': 'code',
   'mod+h': 'highlight'
-}
+};
 
-export const LIST_TYPE = ['numbered-list', 'bulleted-list', 'circle-list']
-export const TEXT_ALIGNMENT_TYPES = ['left', 'center', 'right', 'justify']
+export const LIST_TYPE = ['numbered-list', 'bulleted-list', 'circle-list'];
+export const TEXT_ALIGNMENT_TYPES = ['left', 'center', 'right', 'justify'];

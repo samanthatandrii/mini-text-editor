@@ -1,5 +1,5 @@
-import Footer from '../components/Footer/Footer'
-import TextEditor from '../components/TextEditor/TextEditor'
+import Footer from '../components/Footer/Footer';
+import TextEditor from '../components/TextEditor/TextEditor';
 
 export default function Home() {
   return (
@@ -9,5 +9,5 @@ export default function Home() {
       </div>
       <Footer />
     </div>
-  )
+  );
 }
