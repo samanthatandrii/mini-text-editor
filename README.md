@@ -1,6 +1,6 @@
 # Mini Text Editor
 
-Mini Rich Text Editor projext with Next.js and SlateJs and Chakra UI.
+Mini Rich Text Editor project with Next.js and SlateJs and Chakra UI.
 
 ## Getting Started
 
